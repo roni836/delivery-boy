@@ -1,11 +1,17 @@
 import * as Location from 'expo-location';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Text, StyleSheet, Switch, ScrollView, View, Pressable, SafeAreaView } from 'react-native';
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { Audio } from "expo-av";
 
 export default function HomeScreen() {
   const [locationServicesEnabled, setLocationServicesEnabled] = useState(false);
   const [displayCurrentAddress, setDisplayCurrentAddress] = useState('Fetching location...');
+  const [isOnline, setIsOnline] = useState<boolean>(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+
+
+  // current location fetching
 
   useEffect(() => {
     checkIfLocationEnabled();
@@ -58,8 +64,60 @@ export default function HomeScreen() {
     }
   };
 
+  // order notification
 
-  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    const loadAndPlaySound = async () => {
+      try {
+        // Set audio mode to ensure sound plays even in silent mode
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true, // Ensures sound plays even if the phone is on silent
+          staysActiveInBackground: true, // Keeps playing in the background
+          allowsRecordingIOS: false,
+          shouldDuckAndroid: false, // Ensures sound is not lowered by other apps
+        });
+
+        // Load and play the sound
+        const { sound } = await Audio.Sound.createAsync(
+          require("@/assets/audio/ring.mp3"),
+          {
+            shouldPlay: true,
+            isLooping: true,
+            volume: 1.0, // Ensure full volume
+          }
+        );
+
+        // Save the sound reference
+        soundRef.current = sound;
+
+        // Set the volume to max
+        await soundRef.current.setVolumeAsync(1.0);
+
+      } catch (error) {
+        console.log("Error loading sound:", error);
+      }
+    };
+
+    if (isOnline) {
+      loadAndPlaySound();
+      Alert.alert("New Order!", "You have received a new order.");
+    } else {
+      if (soundRef.current) {
+        soundRef.current.stopAsync();
+        soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+    }
+
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.stopAsync();
+        soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+    };
+  }, [isOnline]);
+
   return (
     <SafeAreaView style={{ paddingTop: 56 }}>
       <ScrollView style={styles.container}>
@@ -67,7 +125,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.locationContainer}>
             <Feather style={{ padding: 6, borderRadius: 50 }} name="menu" size={20} color="#f97316" />
-            <Text style={styles.locationText}>{displayCurrentAddress.substring(0,30)}</Text>
+            <Text style={styles.locationText}>{displayCurrentAddress.substring(0, 20)}</Text>
             <Ionicons name="chevron-down" size={20} color="black" />
           </View>
           <Ionicons style={{ padding: 6, borderRadius: 50 }} name="notifications-outline" size={24} color="#f97316" />
@@ -79,8 +137,14 @@ export default function HomeScreen() {
             <Text style={styles.statusText}>Available Status</Text>
             <Text style={styles.onlineText}>You are online</Text>
           </View>
-          <Switch value={isOnline} trackColor={{ false: "#dcdcdc", true: "#a3e635" }}
-            thumbColor={isOnline ? "#4ade80" : "#f4f3f4"} onValueChange={setIsOnline} />
+          {/* <Switch value={isOnline} trackColor={{ false: "#dcdcdc", true: "#a3e635" }}
+            thumbColor={isOnline ? "#4ade80" : "#f4f3f4"} onValueChange={setIsOnline} /> */}
+          <Switch
+            value={isOnline}
+            trackColor={{ false: "#dcdcdc", true: "#a3e635" }}
+            thumbColor={isOnline ? "#4ade80" : "#f4f3f4"}
+            onValueChange={setIsOnline}
+          />
         </View>
 
         {/* Earnings Card */}
@@ -204,7 +268,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
-    marginTop:10
+    marginTop: 10
   },
   orderStatsContainer: {
     flexDirection: "row",
