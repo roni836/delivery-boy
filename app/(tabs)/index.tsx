@@ -1,8 +1,9 @@
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Text, StyleSheet, Switch, ScrollView, View, Pressable, SafeAreaView } from 'react-native';
+import { Alert, Text, StyleSheet, Switch, ScrollView, View, Pressable, SafeAreaView, Image, TouchableOpacity, Linking } from 'react-native';
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 export default function HomeScreen() {
   const [locationServicesEnabled, setLocationServicesEnabled] = useState(false);
@@ -10,6 +11,21 @@ export default function HomeScreen() {
   const [isOnline, setIsOnline] = useState<boolean>(false);
   const soundRef = useRef<Audio.Sound | null>(null);
 
+  // google map work
+
+  const latitude = 28.6139; // Example: New Delhi
+  const longitude = 77.2090;
+
+  const openGoogleMaps = async () => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+
+    const supported = await Linking.canOpenURL(url);
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert("Error", "Google Maps cannot be opened.");
+    }
+  };
 
   // current location fetching
 
@@ -180,23 +196,110 @@ export default function HomeScreen() {
           <Text style={styles.seeAll}>See All</Text>
         </View>
 
-        {/* Sample Order */}
-        <View style={{ flexDirection: "column", gap: "14" }}>
-          <View style={styles.orderItem}>
-            <View>
-              <Text style={styles.orderIdText}>Order Id</Text>
-              <Text style={styles.orderIdValue}>#ACR148856</Text>
+
+        <View style={styles.orderContainer}>
+          {/* Order Header */}
+          <View style={styles.orderHeader}>
+            <View style={styles.orderIdContainer}>
+              <FontAwesome5 name="bookmark" size={20} color="#f97316" />
+              <View style={{ marginLeft: 8 }}>
+                <Text style={styles.orderIdText}>Order Id</Text>
+                <Text style={styles.orderIdValue}>#ACR148856</Text>
+              </View>
             </View>
             <Text style={styles.orderTime}>1 min ago</Text>
           </View>
-          <View style={styles.orderItem}>
-            <View>
-              <Text style={styles.orderIdText}>Order Id</Text>
-              <Text style={styles.orderIdValue}>#ACR148856</Text>
-            </View>
-            <Text style={styles.orderTime}>1 min ago</Text>
+
+          {/* Order Details */}
+          <View style={styles.orderDetails}>
+            <Text style={styles.orderDetailText}>
+              Payment method <Text style={styles.orderDetailValue}> online</Text>
+            </Text>
+            <Text style={styles.orderDetailText}>
+              Total payment <Text style={styles.paymentAmount}> $32.00</Text>
+            </Text>
+            <Text style={styles.orderDetailText}>
+              Duration <Text style={styles.orderDetailValue}> 25 min</Text>
+            </Text>
           </View>
+
+          {/* Order Map */}
+          <TouchableOpacity onPress={openGoogleMaps} activeOpacity={0.7}>
+            <Image
+              source={{ uri: "https://cdn.wccftech.com/wp-content/uploads/2022/05/Google-Maps-2.jpg" }}
+              style={styles.orderMap}
+            />
+          </TouchableOpacity>
         </View>
+        <View style={styles.orderContainer}>
+          {/* Order Header */}
+          <View style={styles.orderHeader}>
+            <View style={styles.orderIdContainer}>
+              <FontAwesome5 name="bookmark" size={20} color="#f97316" />
+              <View style={{ marginLeft: 8 }}>
+                <Text style={styles.orderIdText}>Order Id</Text>
+                <Text style={styles.orderIdValue}>#ACR148856</Text>
+              </View>
+            </View>
+            <Text style={styles.orderTime}>1 min ago</Text>
+          </View>
+
+          {/* Order Details */}
+          <View style={styles.orderDetails}>
+            <Text style={styles.orderDetailText}>
+              Payment method <Text style={styles.orderDetailValue}> online</Text>
+            </Text>
+            <Text style={styles.orderDetailText}>
+              Total payment <Text style={styles.paymentAmount}> $32.00</Text>
+            </Text>
+            <Text style={styles.orderDetailText}>
+              Duration <Text style={styles.orderDetailValue}> 25 min</Text>
+            </Text>
+          </View>
+
+          {/* Order Map */}
+          <TouchableOpacity onPress={openGoogleMaps} activeOpacity={0.7}>
+            <Image
+              source={{ uri: "https://cdn.wccftech.com/wp-content/uploads/2022/05/Google-Maps-2.jpg" }}
+              style={styles.orderMap}
+            />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.orderContainer}>
+          {/* Order Header */}
+          <View style={styles.orderHeader}>
+            <View style={styles.orderIdContainer}>
+              <FontAwesome5 name="bookmark" size={20} color="#f97316" />
+              <View style={{ marginLeft: 8 }}>
+                <Text style={styles.orderIdText}>Order Id</Text>
+                <Text style={styles.orderIdValue}>#ACR148856</Text>
+              </View>
+            </View>
+            <Text style={styles.orderTime}>1 min ago</Text>
+          </View>
+
+          {/* Order Details */}
+          <View style={styles.orderDetails}>
+            <Text style={styles.orderDetailText}>
+              Payment method <Text style={styles.orderDetailValue}> online</Text>
+            </Text>
+            <Text style={styles.orderDetailText}>
+              Total payment <Text style={styles.paymentAmount}> $32.00</Text>
+            </Text>
+            <Text style={styles.orderDetailText}>
+              Duration <Text style={styles.orderDetailValue}> 25 min</Text>
+            </Text>
+          </View>
+
+          {/* Order Map */}
+          <TouchableOpacity onPress={openGoogleMaps} activeOpacity={0.7}>
+            <Image
+              source={{ uri: "https://cdn.wccftech.com/wp-content/uploads/2022/05/Google-Maps-2.jpg" }}
+              style={styles.orderMap}
+            />
+          </TouchableOpacity>
+        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -311,6 +414,25 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  orderContainer: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 12,
+    marginVertical: 8,
+    marginHorizontal: 10,
+    borderWidth: 1, // Border added instead of shadow
+    borderColor: "#e0e0e0", // Light gray border
+  },
+  orderHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  orderIdContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   orderIdText: {
     color: "gray",
     fontSize: 14,
@@ -323,4 +445,28 @@ const styles = StyleSheet.create({
     color: "gray",
     fontSize: 14,
   },
+  orderDetails: {
+    paddingVertical: 8,
+    backgroundColor: "slate"
+  },
+  orderDetailText: {
+    fontSize: 14,
+    color: "gray",
+    marginBottom: 4,
+  },
+  orderDetailValue: {
+    fontWeight: "bold",
+    color: "#333",
+  },
+  paymentAmount: {
+    fontWeight: "bold",
+    color: "#f97316",
+    fontSize: 16,
+  },
+  orderMap: {
+    height: 120,
+    width: "100%",
+    borderRadius: 8,
+    marginTop: 8,
+  }
 });
